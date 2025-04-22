@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./", // 프로젝트 루트를 기준으로 설정
+    "paths": {
+      "@src/*": ["./src/*"] // '@src/' 접두사를 사용해 'src' 디렉토리로 매핑
+    },
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "src" // 'src' 디렉토리의 모든 파일을 포함
+  ],
+  "files": [],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
