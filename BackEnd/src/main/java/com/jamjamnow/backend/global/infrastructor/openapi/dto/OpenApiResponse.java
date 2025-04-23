@@ -1,7 +1,12 @@
 package com.jamjamnow.backend.global.infrastructor.openapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.jamjamnow.backend.global.infrastructor.openapi.NumericStringToInt;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true) // 예기치 않은 필드는 무시
 public record OpenApiResponse(
     Header header,
     Body body
@@ -16,13 +21,15 @@ public record OpenApiResponse(
 
     public record Body(
         Items items,
-        String totalCount,
-        String pageNo,
-        String numOfRows,
+        @JsonDeserialize(using = NumericStringToInt.class)
+        int totalCount,
+        int pageNo,
+        int numOfRows,
         String dataType
     ) {
 
         public record Items(
+            @JsonAlias("item") // 1개면 Object, 여러개면 List 문제 대비
             List<Item> item
         ) {
 
