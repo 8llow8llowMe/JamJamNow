@@ -44,6 +44,9 @@ dependencies {
     // WelFlux
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+    // Spring Batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
