@@ -4,6 +4,8 @@ import com.jamjamnow.backend.domain.member.dto.MemberLoginRequest;
 import com.jamjamnow.backend.domain.member.dto.MemberLoginResponse;
 import com.jamjamnow.backend.domain.member.dto.MemberSignupRequest;
 import com.jamjamnow.backend.domain.member.entity.Member;
+import com.jamjamnow.backend.domain.member.exception.MemberErrorCode;
+import com.jamjamnow.backend.domain.member.exception.MemberException;
 import com.jamjamnow.backend.domain.member.repository.MemberRepository;
 import com.jamjamnow.backend.global.util.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void signupMember(MemberSignupRequest signupRequest) {
         if (memberRepository.existsByEmail(signupRequest.email())) {
-            throw new RuntimeException("해당 이메일을 가진 회원이 존재합니다.");
+            throw new MemberException(MemberErrorCode.EXIST_MEMBER_EMAIL);
         }
 
         Member member = Member.builder()
@@ -40,8 +42,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberLoginResponse loginMember(MemberLoginRequest loginRequest) {
-        Member member = memberRepository.findByEmail(loginRequest.email())
-            .orElseThrow(() -> new RuntimeException("해당 이메일을 가진 회원정보가 존재하지 않습니다."));
+        Member member = findByEmail(loginRequest.email());
 
         String realPassword = member.getPassword();
 
@@ -51,5 +52,15 @@ public class MemberServiceImpl implements MemberService {
 
         // TODO: 로그인 성공 시 토큰 정보 및 회원 정보 반환하기
         return null;
+    }
+
+    private Member findById(Long memberId) {
+        return memberRepository.findById(memberId)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
+    }
+
+    private Member findByEmail(String email) {
+        return memberRepository.findByEmail(email)
+            .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND_MEMBER));
     }
 }
