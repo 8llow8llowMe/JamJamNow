@@ -1,8 +1,11 @@
 package com.jamjamnow.backend.domain.member.entity;
 
+import com.jamjamnow.backend.domain.member.entity.enums.MemberRole;
 import com.jamjamnow.backend.global.common.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
@@ -27,7 +30,7 @@ public class Member extends BaseEntity {
     @Comment("회원 아이디")
     @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
-    
+
     @Comment("이메일")
     @Column(nullable = false)
     private String email;
@@ -46,4 +49,9 @@ public class Member extends BaseEntity {
 
     @Comment("프로필 이미지 URL")
     private String profileImage;
+
+    @Comment("권한")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MemberRole role;
 }
