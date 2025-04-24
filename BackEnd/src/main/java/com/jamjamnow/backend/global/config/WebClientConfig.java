@@ -45,11 +45,11 @@ public class WebClientConfig {
     // 요청 로그 필터
     private ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            log.info("➡️ Request: [{}] {}", clientRequest.method(), clientRequest.url());
+            log.info("-> Request: [{}] {}", clientRequest.method(), clientRequest.url());
 
             // 모든 헤더 출력 (디버깅에 유용)
             clientRequest.headers().forEach((name, values) ->
-                values.forEach(value -> log.debug("   ↪ {}: {}", name, value)));
+                values.forEach(value -> log.debug("===>  {}: {}", name, value)));
 
             return Mono.just(clientRequest);
         });
@@ -58,7 +58,7 @@ public class WebClientConfig {
     // 응답 로그 필터
     private ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            log.info("⬅️ Response [{}]", clientResponse.statusCode());
+            log.info("<- Response [{}]", clientResponse.statusCode());
             return Mono.just(clientResponse);
         });
     }
