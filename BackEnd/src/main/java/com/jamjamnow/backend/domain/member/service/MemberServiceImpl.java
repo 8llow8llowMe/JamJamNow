@@ -47,7 +47,7 @@ public class MemberServiceImpl implements MemberService {
         String realPassword = member.getPassword();
 
         if (!passwordEncoder.matches(loginRequest.password(), realPassword)) {
-            throw new RuntimeException("비밀번호가 틀렸습니다. 다시 한번 확인해주세요.");
+            throw new MemberException(MemberErrorCode.NOT_MATCH_PASSWORD);
         }
 
         // TODO: 로그인 성공 시 토큰 정보 및 회원 정보 반환하기
