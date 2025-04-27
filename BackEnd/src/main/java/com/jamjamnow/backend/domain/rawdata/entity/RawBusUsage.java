@@ -74,6 +74,7 @@ public class RawBusUsage {
     private String rteId;
 
     @Comment("정류장 ID")
+    @Column(length = 20)
     private String sttnId;
 
     @Comment("이용자 유형명 (예: 일반인)")
@@ -82,5 +83,5 @@ public class RawBusUsage {
 
     @Comment("이용 인원 수")
     @Column(columnDefinition = "INT UNSIGNED")
-    private int utztnNope;
+    private Integer utztnNope;
 }
