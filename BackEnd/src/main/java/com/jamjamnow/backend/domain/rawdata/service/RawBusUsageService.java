@@ -6,4 +6,6 @@ import java.util.List;
 public interface RawBusUsageService {
 
     void saveAllIfNotExists(List<RawBusUsage> usages);
+
+    void saveAllForce(List<RawBusUsage> usages);
 }

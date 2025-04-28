@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,20 +19,21 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-    uniqueConstraints = @UniqueConstraint(
-        name = "uk_oprYmd_sttnId_usersTypeNm",
-        columnNames = {"oprYmd", "sttnId", "usersTypeNm"}
-    ),
+//    uniqueConstraints = @UniqueConstraint(
+//        name = "uk_oprYmd_emdCd_rteId_sttnId_usersTypeNm",
+//        columnNames = {"oprYmd", "emdCd", "rteId", "sttnId", "usersTypeNm"}
+//    ),
     indexes = {
         @Index(name = "idx_oprYmd", columnList = "oprYmd"),
         @Index(name = "idx_ctpvCd", columnList = "ctpvCd"),
-        @Index(name = "idx_sggCd", columnList = "sggCd")
+        @Index(name = "idx_sggCd", columnList = "sggCd"),
+        @Index(name = "idx_emdCd", columnList = "emdCd")
     }
 )
 public class RawBusUsage {
 
     @Id
-    @Comment("국토교통부_대중교통 이용인원수 ID")
+    @Comment("국토교통부 대중교통 이용인원수 ID")
     @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 

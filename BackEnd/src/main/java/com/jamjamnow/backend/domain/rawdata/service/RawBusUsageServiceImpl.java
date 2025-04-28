@@ -7,10 +7,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class RawBusUsageServiceImpl implements RawBusUsageService {
 
@@ -45,6 +49,20 @@ public class RawBusUsageServiceImpl implements RawBusUsageService {
 
         if (!toSave.isEmpty()) {
             repository.saveAll(toSave);
+        }
+    }
+
+    @Override
+    public void saveAllForce(List<RawBusUsage> usages) {
+        if (usages.isEmpty()) {
+            return;
+        }
+
+        try {
+            repository.saveAll(usages);
+            repository.flush();  // Hibernate batch insert
+        } catch (Exception e) {
+            log.warn("[Batch] 중복 insert 무시 - 일부 데이터는 이미 존재합니다.", e);
         }
     }
 }
