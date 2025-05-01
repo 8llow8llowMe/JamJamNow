@@ -19,10 +19,6 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-//    uniqueConstraints = @UniqueConstraint(
-//        name = "uk_oprYmd_emdCd_rteId_sttnId_usersTypeNm",
-//        columnNames = {"oprYmd", "emdCd", "rteId", "sttnId", "usersTypeNm"}
-//    ),
     indexes = {
         @Index(name = "idx_oprYmd", columnList = "oprYmd"),
         @Index(name = "idx_ctpvCd", columnList = "ctpvCd"),
@@ -42,46 +38,46 @@ public class RawBusUsage {
     private LocalDate oprYmd;
 
     @Comment("요일명")
-    @Column(length = 10)
+    @Column(length = 10, nullable = false)
     private String dowNm;
 
     @Comment("시도코드")
-    @Column(length = 2)
+    @Column(length = 2, nullable = false)
     private String ctpvCd;
 
     @Comment("시도명")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String ctpvNm;
 
     @Comment("시군구코드")
-    @Column(length = 5)
+    @Column(length = 5, nullable = false)
     private String sggCd;
 
     @Comment("시군구명")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String sggNm;
 
     @Comment("읍면동코드")
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String emdCd;
 
     @Comment("읍면동명")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String emdNm;
 
     @Comment("노선 ID")
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String rteId;
 
     @Comment("정류장 ID")
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String sttnId;
 
     @Comment("이용자 유형명 (예: 일반인)")
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String usersTypeNm;
 
     @Comment("이용 인원 수")
-    @Column(columnDefinition = "INT UNSIGNED")
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer utztnNope;
 }
