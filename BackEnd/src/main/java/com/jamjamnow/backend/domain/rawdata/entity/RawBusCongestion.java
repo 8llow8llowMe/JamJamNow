@@ -28,50 +28,50 @@ public class RawBusCongestion {
     private LocalDate oprYmd;
 
     @Comment("요일명")
-    @Column(length = 10)
+    @Column(length = 10, nullable = false)
     private String dowNm;
 
     @Comment("시도코드")
-    @Column(length = 2)
+    @Column(length = 2, nullable = false)
     private String ctpvCd;
 
     @Comment("시도명")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String ctpvNm;
 
     @Comment("시군구코드")
-    @Column(length = 5)
+    @Column(length = 5, nullable = false)
     private String sggCd;
 
     @Comment("시군구명")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String sggNm;
 
     @Comment("읍면동코드")
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String emdCd;
 
     @Comment("읍면동명")
-    @Column(length = 50)
+    @Column(length = 50, nullable = false)
     private String emdNm;
 
     @Comment("노선 ID")
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String rteId;
 
     @Comment("정류장 순서")
-    @Column(columnDefinition = "INT UNSIGNED")
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer sttnSeq;
 
     @Comment("정류장 ID")
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String sttnId;
 
     @Comment("시간대")
-    @Column(length = 2)
+    @Column(length = 2, nullable = false)
     private String tzon;
 
     @Comment("혼잡도")
-    @Column(columnDefinition = "INT UNSIGNED")
+    @Column(columnDefinition = "INT UNSIGNED", nullable = false)
     private Integer cgst;
 }
