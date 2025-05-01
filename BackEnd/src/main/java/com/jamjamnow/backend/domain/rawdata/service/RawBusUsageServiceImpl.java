@@ -58,12 +58,44 @@ public class RawBusUsageServiceImpl implements RawBusUsageService {
             return;
         }
 
+        List<RawBusUsage> filtered = usages.stream()
+            .filter(this::isValid)
+            .toList();
+
+        int skipped = usages.size() - filtered.size();
+        if (skipped > 0) {
+            log.warn("[Batch] 유효하지 않은 데이터 {}건은 저장 대상에서 제외됨", skipped);
+        }
+
+        if (filtered.isEmpty()) {
+            return;
+        }
+
         try {
-            repository.saveAll(usages);
+            repository.saveAll(filtered);
             repository.flush();  // Hibernate batch insert
         } catch (Exception e) {
             log.warn("[Batch] 중복 insert 무시 - 일부 데이터는 이미 존재합니다.", e);
         }
+    }
+
+    private boolean isValid(RawBusUsage rawBusUsage) {
+        return rawBusUsage.getOprYmd() != null
+            && isNotBlank(rawBusUsage.getDowNm())
+            && isNotBlank(rawBusUsage.getCtpvCd())
+            && isNotBlank(rawBusUsage.getCtpvNm())
+            && isNotBlank(rawBusUsage.getSggCd())
+            && isNotBlank(rawBusUsage.getSggNm())
+            && isNotBlank(rawBusUsage.getEmdCd())
+            && isNotBlank(rawBusUsage.getEmdNm())
+            && isNotBlank(rawBusUsage.getRteId())
+            && isNotBlank(rawBusUsage.getSttnId())
+            && isNotBlank(rawBusUsage.getUsersTypeNm())
+            && rawBusUsage.getUtztnNope() != null;
+    }
+
+    private boolean isNotBlank(String s) {
+        return s != null && !s.trim().isEmpty() && !s.trim().equals("~");
     }
 }
 
