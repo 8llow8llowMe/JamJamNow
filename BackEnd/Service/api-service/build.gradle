@@ -1,0 +1,15 @@
+dependencies {
+    implementation project(":Module:common-module")
+    implementation project(":Module:persistence-module")
+    implementation project(":Module:security-module")
+    // Spring Data JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Spring MVC
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // MySQL JDBC
+    runtimeOnly 'com.mysql:mysql-connector-j'
+}
