@@ -1,0 +1,15 @@
+dependencies {
+    // 공통 설정 관련
+    implementation project(":Module:common-module")
+    // Spring Security 기본 (FilterChain, @PreAuthorize 등)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // Spring MVC
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.2'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.2'
+}
+
+bootJar { enabled = false }
+jar { enabled = true }
