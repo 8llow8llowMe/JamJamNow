@@ -1,1 +1,10 @@
 rootProject.name = 'backend'
+
+// Modules
+include 'Module:common-module'
+include 'Module:persistence-module'
+include 'Module:security-module'
+
+// Services
+include 'Service:api-service'
+include 'Service:batch-service'
