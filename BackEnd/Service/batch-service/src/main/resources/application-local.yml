@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+  shutdown: graceful
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/jamjamnow?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # 데이터베이스 URL
+    username: ENC(OL9lhGYuBl819xoaLMPAxuTVlN8pJ3GE)
+    password: ENC(Q7kGpk90tMWOMI0Eoa6+xqjXROMGqmTxIiKQvkZldzw=)
+
+  jpa:
+    open-in-view: false
+    defer-datasource-initialization: true
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        show_sql: false
+        jdbc:
+          batch_size: 1000
+        default_batch_fetch_size: 100
+
+# 대중교통 관련 API
+openapi:
+  apis:
+    transport:
+      url: ENC(rAOJsN987HutKijmqIdhIl2xqEh2edjHqj5OzGjtzUFB+tdTE8uF84tnxZBeWu9ew4hXJsMwsfJP/0TNqudkr76EhLk9URTyn3hWHScj70TnnV8IUcs4bygQCmTCRUStNyYBuUJEKiqIEEPcLOhmglZIHOQKXKih)
+      service-key: ENC(F5WRR9ds01ojd6rKF0pNeBKrMsVMJIoVDiYmoxi1c+TEwE+yXK+xXWqduM8BWGy4SgUwbdND56RnsazsW/KuGW2YuXwLHZvp5iJ2ZPMfZ6l2INfTGlKaFQK4SqWmd8+hhhdBg/6OxfY=)
+      defaultParams:
+        numOfRows: "100"
+        dataType: JSON

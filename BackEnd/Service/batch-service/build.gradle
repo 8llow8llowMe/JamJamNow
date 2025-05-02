@@ -1,0 +1,14 @@
+dependencies {
+    implementation project(":Module:common-module")
+    implementation project(":Module:persistence-module")
+    // Spring Data JPA
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // Spring MVC
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    // WelFlux
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    // Spring Batch
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
+    // MySQL JDBC
+    runtimeOnly 'com.mysql:mysql-connector-j'
+}
