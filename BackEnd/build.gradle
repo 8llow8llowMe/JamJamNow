@@ -4,61 +4,61 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'com.mirero'
+// 루트 프로젝트 자체는 실행 JAR을 만들 필요가 없으므로 OFF
+bootJar { enabled = false }
+jar { enabled = false }
+
+group = 'com.jamjamnow'
 version = '0.0.1-SNAPSHOT'
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+// 공통 레포지토리
+allprojects {
+    repositories {
+        mavenCentral()
     }
 }
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
+// 서브모듈 공통 설정
+subprojects { project ->
+    // 껍데이 그룹 프로젝트 필터링
+    if (project.name in ['Service', 'Module']) {
+        // 필요 최소한의 설정만 하고 Spring Boot / bootJar 모두 끔
+        apply plugin: 'java'
+
+        bootJar { enabled = false }
+        jar { enabled = false }
+
+        return // 아래 Spring Boot 공통 설정은 실행 모듈(leaf)만 적용
     }
-}
 
-repositories {
-    mavenCentral()
-}
+    // 실제 실행 모듈(leaf project) 기본 설정
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
 
-dependencies {
-    // Spring Data JPA
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    bootJar { enabled = true }
+    jar { enabled = false }
 
-    // Spring MVC
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
 
-    // Spring Security
-    implementation 'org.springframework.boot:spring-boot-starter-security'
+    configurations {
+        compileOnly { extendsFrom annotationProcessor }
+    }
 
-    // JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
-    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    dependencies {
+        // Lombok & DevTools
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
-    // Redis
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+        // test
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
 
-    // WelFlux
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
-    // Spring Batch
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
-
-    // Jasypt (Java Simplified Encryption)
-    implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
-
-
-    compileOnly 'org.projectlombok:lombok'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
+    tasks.named('test') { useJUnitPlatform() }
 }
