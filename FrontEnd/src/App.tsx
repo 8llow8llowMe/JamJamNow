@@ -1,4 +1,4 @@
-import Router from "@src/router/router";
+import Router from "@src/router/Router";
 import { CookiesProvider } from "react-cookie";
 
 function App() {
