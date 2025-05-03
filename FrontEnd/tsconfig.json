@@ -24,7 +24,8 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src" // 'src' 디렉토리의 모든 파일을 포함
+    "src", // 'src' 디렉토리의 모든 파일을 포함
+    "postcss.config.ts"
   ],
   "files": [],
   "references": [{ "path": "./tsconfig.node.json" }]
