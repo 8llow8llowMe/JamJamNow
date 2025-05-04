@@ -19,7 +19,7 @@ import org.hibernate.annotations.Comment;
 public class RawBusReboarding {
 
     @Id
-    @Comment("국토교통부 노선별 차내 재차인원")
+    @Comment("국토교통부 노선별 차내 재차인원 ID")
     @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
