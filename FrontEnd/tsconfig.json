@@ -25,7 +25,8 @@
   },
   "include": [
     "src", // 'src' 디렉토리의 모든 파일을 포함
-    "postcss.config.ts"
+    "postcss.config.ts",
+    "types"
   ],
   "files": [],
   "references": [{ "path": "./tsconfig.node.json" }]
