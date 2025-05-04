@@ -20,7 +20,7 @@ public class RawBusReboarding {
 
     @Id
     @Comment("국토교통부 노선별 차내 재차인원")
-    @Column(columnDefinition = "BININT UNSIGNED")
+    @Column(columnDefinition = "BIGINT UNSIGNED")
     private Long id;
 
     @Comment("운행일자")
