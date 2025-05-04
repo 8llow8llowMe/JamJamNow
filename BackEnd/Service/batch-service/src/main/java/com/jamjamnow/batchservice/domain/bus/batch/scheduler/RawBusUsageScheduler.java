@@ -1,4 +1,4 @@
-package com.jamjamnow.batchservice.global.infrastructor.batch.scheduler;
+package com.jamjamnow.batchservice.domain.bus.batch.scheduler;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

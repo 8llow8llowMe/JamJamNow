@@ -1,7 +1,7 @@
-package com.jamjamnow.batchservice.global.infrastructor.batch.job;
+package com.jamjamnow.batchservice.domain.bus.batch.job;
 
-import com.jamjamnow.batchservice.global.infrastructor.batch.runner.RawBusUsageJobRunner;
-import com.jamjamnow.batchservice.global.infrastructor.batch.tasklet.RawBusUsageTasklet;
+import com.jamjamnow.batchservice.domain.bus.batch.runner.RawBusUsageJobRunner;
+import com.jamjamnow.batchservice.domain.bus.batch.tasklet.RawBusUsageTasklet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
