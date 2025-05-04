@@ -3,6 +3,7 @@ package com.jamjamnow.batchservice.domain.bus.service;
 import com.jamjamnow.batchservice.domain.bus.entity.RawBusUsage;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +51,7 @@ public class RawBusUsageServiceImpl implements RawBusUsageService {
 
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
-            public void setValues(PreparedStatement ps, int i) throws java.sql.SQLException {
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
                 RawBusUsage r = validList.get(i);
                 ps.setLong(1, r.getId());
                 ps.setDate(2, Date.valueOf(r.getOprYmd()));
