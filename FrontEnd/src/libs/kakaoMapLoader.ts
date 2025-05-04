@@ -6,14 +6,14 @@ export const loadKakaoMap = (): Promise<typeof window.kakao> => {
     }
 
     const script = document.createElement("script");
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_API_KEY}&autoload=false`;
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_REACT_APP_KAKAOMAP_API_KEY}&autoload=false`;
     script.async = true;
     script.onload = () => {
       window.kakao.maps.load(() => {
         resolve(window.kakao);
       });
     };
-    script.onerror = reject;
+    script.onerror = (err) => reject(err);
 
     document.head.appendChild(script);
   });
