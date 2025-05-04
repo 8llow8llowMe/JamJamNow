@@ -24,7 +24,7 @@ import org.hibernate.annotations.Comment;
         @UniqueConstraint(
             name = "uk_rawbususage_unique",
             columnNames = {
-                "oprYmd", "emdCd", "rteId", "sttnId", "usersTypeNm"
+                "oprYmd", "ctpvCd", "sggCd", "emdCd", "rteId", "sttnId", "usersTypeNm"
             }
         )
     },
