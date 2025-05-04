@@ -22,7 +22,7 @@ spring:
         use_sql_comments: false
         show_sql: false
         jdbc:
-          batch_size: 1000
+          batch_size: 100
         default_batch_fetch_size: 100
 
 # 대중교통 관련 API
