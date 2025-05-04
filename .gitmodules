@@ -1,0 +1,3 @@
+[submodule "FrontEnd/env"]
+	path = FrontEnd/env
+	url = https://github.com/8llow8llowMe/JamJamNow-env.git
