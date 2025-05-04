@@ -32,6 +32,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RawBusUsageTasklet implements Tasklet {
 
+    // 동시 실행을 제한할 가상 스레드 세마포어 임계값 (한 번에 5개 페이지 처리)
     private static final int CONCURRENCY_LIMIT = 5;
 
     private final DynamicOpenApiClient openApiClient;
@@ -42,12 +43,15 @@ public class RawBusUsageTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext)
         throws Exception {
+        // 1. 배치 Job 파라미터에서 날짜 및 시도코드 파라미터 추출
         String oprYmd = (String) chunkContext.getStepContext().getJobParameters().get("oprYmd");
         String sidoParam = (String) chunkContext.getStepContext().getJobParameters().get("sido");
 
+        // 2. 수집 대상 시도코드 목록 결정 (입력 없으면 전체 시도)
         List<String> targetSidoCodes = getTargetSidoCodes(sidoParam);
         log.info("[Batch] oprYmd={}, 시도코드 목록={}", oprYmd, targetSidoCodes);
 
+        // 3, 시도코드별로 OpenAPI 병렬 수집 처리
         for (String ctpvCd : targetSidoCodes) {
             collectByRegionVirtual(ctpvCd, oprYmd);
         }
@@ -58,33 +62,37 @@ public class RawBusUsageTasklet implements Tasklet {
     private void collectByRegionVirtual(String ctpvCd, String oprYmd) throws InterruptedException {
         log.info("[Batch] 시도코드={} 날짜={} 수집 시작", ctpvCd, oprYmd);
 
+        // 1. OpenAPI 첫 페이지 호출로 총 페이지 수 획득
         int totalPages = getTotalPages(ctpvCd, oprYmd);
         if (totalPages == 0) {
             log.warn("[Batch] 수집할 데이터 없음 - 시도코드={} 날짜={}", ctpvCd, oprYmd);
             return;
         }
 
-        Semaphore semaphore = new Semaphore(CONCURRENCY_LIMIT);
+        // 2. JAVA 21 가상 스레드 기반 Executor 생성
+        Semaphore semaphore = new Semaphore(CONCURRENCY_LIMIT); // 동시 실행 제한
         ExecutorService virtualThreadExecutor = Executors.newThreadPerTaskExecutor(
             Thread.ofVirtual().factory());
         List<CompletableFuture<Integer>> futures = new ArrayList<>();
 
+        // 3. 페이지 수만큼 fetch 작업을 CompletableFuture + Virtual Thread로 등록
         for (int pageNo = 1; pageNo <= totalPages; pageNo++) {
             final int finalPage = pageNo;
             semaphore.acquire();
 
+            // 4. 비동기 가상 스레드로 fetch + 저장 수행
             CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return fetchAndSave(ctpvCd, oprYmd, finalPage);
+                    return fetchAndSave(ctpvCd, oprYmd, finalPage); // 개별 페이지 수집 및 저장
                 } finally {
-                    semaphore.release();
+                    semaphore.release(); // 작업 완료 시 세마포어 반환
                 }
             }, virtualThreadExecutor);
 
             futures.add(future);
         }
 
-        // 모든 작업 완료 대기 및 결과 집계
+        // 5. 모든 페이지 작업 완료 후 결과 수집 (join 사용)
         int totalSaved = futures.stream()
             .mapToInt(f -> {
                 try {
@@ -95,7 +103,8 @@ public class RawBusUsageTasklet implements Tasklet {
                 }
             }).sum();
 
-        virtualThreadExecutor.shutdown(); // ⭐ 가상 스레드 Executor 종료
+        // 6. 가상 스레드 Excutor 종료
+        virtualThreadExecutor.shutdown();
         log.info("[Batch] 시도코드={} 날짜={} 최종 저장 건수={}", ctpvCd, oprYmd, totalSaved);
     }
 
