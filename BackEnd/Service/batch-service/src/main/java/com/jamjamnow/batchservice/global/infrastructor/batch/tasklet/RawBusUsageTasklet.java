@@ -10,16 +10,15 @@ import com.jamjamnow.persistencemodule.domain.standard.entity.Sido;
 import com.jamjamnow.persistencemodule.domain.standard.repository.SidoRepository;
 import com.jamjamnow.persistencemodule.global.util.SnowflakeIdGenerator;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Semaphore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
@@ -33,8 +32,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RawBusUsageTasklet implements Tasklet {
 
-    private static final int THREAD_POOL_SIZE = 1;
-    private static final List<String> TARGET_SIDO_CODES = List.of("11", "31", "23"); // 서울, 경기, 인천
+    private static final int CONCURRENCY_LIMIT = 5;
 
     private final DynamicOpenApiClient openApiClient;
     private final RawBusUsageService rawBusUsageService;
@@ -44,57 +42,65 @@ public class RawBusUsageTasklet implements Tasklet {
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext)
         throws Exception {
-        LocalDate from = getStartDate(chunkContext);
-        LocalDate to = getEndDate(chunkContext, from);
+        String oprYmd = (String) chunkContext.getStepContext().getJobParameters().get("oprYmd");
+        String sidoParam = (String) chunkContext.getStepContext().getJobParameters().get("sido");
 
-        try (ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE)) {
+        List<String> targetSidoCodes = getTargetSidoCodes(sidoParam);
+        log.info("[Batch] oprYmd={}, 시도코드 목록={}", oprYmd, targetSidoCodes);
 
-            for (LocalDate date = from; !date.isAfter(to); date = date.plusDays(1)) {
-                String oprYmd = date.format(DateTimeFormatter.BASIC_ISO_DATE);
-                log.info("[Batch] 날짜={} 수집 시작", oprYmd);
-
-                List<Sido> sidoList = sidoRepository.findAll().stream()
-                    .filter(sido -> TARGET_SIDO_CODES.contains(sido.getCtpvCd()))
-                    .toList();
-
-                List<Callable<Integer>> tasks = new ArrayList<>();
-
-                for (Sido sido : sidoList) {
-                    tasks.add(() -> collectByRegion(sido.getCtpvCd(), oprYmd));
-                }
-
-                List<Future<Integer>> results = executor.invokeAll(tasks);
-
-                int total = 0;
-                for (Future<Integer> result : results) {
-                    total += result.get();
-                }
-
-                log.info("[Batch] 날짜={} 총 저장 건수={}", oprYmd, total);
-            }
-
-            executor.shutdown();
-            executor.awaitTermination(1, TimeUnit.HOURS);
+        for (String ctpvCd : targetSidoCodes) {
+            collectByRegionVirtual(ctpvCd, oprYmd);
         }
 
         return RepeatStatus.FINISHED;
     }
 
-    private int collectByRegion(String ctpvCd, String oprYmd) {
-        int totalSaved = 0;
-        int pageNo = 1;
-        int totalPages = 1; // 기본값
+    private void collectByRegionVirtual(String ctpvCd, String oprYmd) throws InterruptedException {
+        log.info("[Batch] 시도코드={} 날짜={} 수집 시작", ctpvCd, oprYmd);
 
-        while (pageNo <= totalPages) {
-            log.info("[Batch] 수집 중: 날짜={}, 시도코드={}, pageNo={}", oprYmd, ctpvCd, pageNo);
+        int totalPages = getTotalPages(ctpvCd, oprYmd);
+        if (totalPages == 0) {
+            log.warn("[Batch] 수집할 데이터 없음 - 시도코드={} 날짜={}", ctpvCd, oprYmd);
+            return;
+        }
 
-            try {
-                Thread.sleep(300); // 호출 간 지연
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                log.warn("딜레이 중단됨", e);
-            }
+        Semaphore semaphore = new Semaphore(CONCURRENCY_LIMIT);
+        ExecutorService virtualThreadExecutor = Executors.newThreadPerTaskExecutor(
+            Thread.ofVirtual().factory());
+        List<CompletableFuture<Integer>> futures = new ArrayList<>();
 
+        for (int pageNo = 1; pageNo <= totalPages; pageNo++) {
+            final int finalPage = pageNo;
+            semaphore.acquire();
+
+            CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return fetchAndSave(ctpvCd, oprYmd, finalPage);
+                } finally {
+                    semaphore.release();
+                }
+            }, virtualThreadExecutor);
+
+            futures.add(future);
+        }
+
+        // 모든 작업 완료 대기 및 결과 집계
+        int totalSaved = futures.stream()
+            .mapToInt(f -> {
+                try {
+                    return f.join();
+                } catch (Exception e) {
+                    log.error("[Batch] 수집 중 오류", e);
+                    return 0;
+                }
+            }).sum();
+
+        virtualThreadExecutor.shutdown(); // ⭐ 가상 스레드 Executor 종료
+        log.info("[Batch] 시도코드={} 날짜={} 최종 저장 건수={}", ctpvCd, oprYmd, totalSaved);
+    }
+
+    private int fetchAndSave(String ctpvCd, String oprYmd, int pageNo) {
+        try {
             Map<String, String> params = Map.of(
                 "opr_ymd", oprYmd,
                 "ctpv_cd", ctpvCd,
@@ -107,23 +113,13 @@ public class RawBusUsageTasklet implements Tasklet {
                 .orElse(null);
 
             if (res == null || res.body() == null || res.body().items() == null) {
-                break;
-            }
-
-            // 첫 페이지에서 totalCount 기반 페이지 수 계산
-            int totalCount = res.body().totalCount();  // null 불가, int 타입일 경우 항상 값이 있음
-            if (pageNo == 1 && totalCount > 0) {
-                totalPages = (int) Math.ceil(totalCount / 100.0);
-                log.info("전체 건수={}, 총 페이지={}", totalCount, totalPages);
-            } else if (pageNo == 1 && totalCount <= 0) {
-                log.warn("totalCount가 0이거나 잘못된 응답입니다. 시도코드={}, 날짜={}", ctpvCd, oprYmd);
-                break;
+                return 0;
             }
 
             List<BusUsageItem> items = Optional.ofNullable(res.body().items().item())
                 .orElse(List.of());
             if (items.isEmpty()) {
-                break;
+                return 0;
             }
 
             List<RawBusUsage> entities = items.stream()
@@ -144,28 +140,52 @@ public class RawBusUsageTasklet implements Tasklet {
                     .build())
                 .toList();
 
-            rawBusUsageService.saveAllForce(entities);
-            totalSaved += entities.size();
-            pageNo++;
-        }
+            rawBusUsageService.saveAllIgnoreDuplicates(entities);
+            return entities.size();
 
-        return totalSaved;
+        } catch (Exception e) {
+            log.error("[Batch] 시도={} 날짜={} page={} 수집 중 에러", ctpvCd, oprYmd, pageNo, e);
+            return 0;
+        }
     }
 
-    private LocalDate getStartDate(ChunkContext context) {
-        String from = (String) context.getStepContext().getJobParameters().get("from");
-        if (from != null) {
-            return LocalDate.parse(from, DateTimeFormatter.BASIC_ISO_DATE);
+    private int getTotalPages(String ctpvCd, String oprYmd) {
+        try {
+            Map<String, String> params = Map.of(
+                "opr_ymd", oprYmd,
+                "ctpv_cd", ctpvCd,
+                "pageNo", "1"
+            );
+
+            OpenApiResponse res = Optional.ofNullable(
+                    openApiClient.fetch("transport", params, OpenApiDynamicWrapper.class))
+                .map(OpenApiDynamicWrapper::getFirstResponse)
+                .orElse(null);
+
+            if (res == null || res.body() == null || res.body().totalCount() <= 0) {
+                return 0;
+            }
+
+            int totalCount = res.body().totalCount();
+            int totalPages = (int) Math.ceil(totalCount / 100.0);
+            log.info("[Batch] 시도={} 날짜={} 전체 건수={}, 총 페이지={}", ctpvCd, oprYmd, totalCount,
+                totalPages);
+            return totalPages;
+
+        } catch (Exception e) {
+            log.error("[Batch] 시도={} 날짜={} 전체 페이지 조회 실패", ctpvCd, oprYmd, e);
+            return 0;
         }
-        return LocalDate.now().minusDays(30);
     }
 
-    private LocalDate getEndDate(ChunkContext context, LocalDate defaultFrom) {
-        String to = (String) context.getStepContext().getJobParameters().get("to");
-        if (to != null) {
-            return LocalDate.parse(to, DateTimeFormatter.BASIC_ISO_DATE);
+    private List<String> getTargetSidoCodes(String sidoParam) {
+        if (sidoParam != null && !sidoParam.isBlank()) {
+            return Arrays.stream(sidoParam.split(",")).map(String::trim).toList();
+        } else {
+            return sidoRepository.findAll().stream()
+                .map(Sido::getCtpvCd)
+                .toList();
         }
-        return defaultFrom.plusDays(2);  // 기본 자동 수집 3일치
     }
 
     private LocalDate parseDate(String yyyymmdd) {
