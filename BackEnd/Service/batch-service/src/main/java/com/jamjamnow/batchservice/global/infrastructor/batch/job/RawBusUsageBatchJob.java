@@ -1,12 +1,15 @@
 package com.jamjamnow.batchservice.global.infrastructor.batch.job;
 
+import com.jamjamnow.batchservice.global.infrastructor.batch.runner.RawBusUsageJobRunner;
 import com.jamjamnow.batchservice.global.infrastructor.batch.tasklet.RawBusUsageTasklet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -31,5 +34,10 @@ public class RawBusUsageBatchJob {
         return new StepBuilder("rawBusUsageStep", jobRepository)
             .tasklet(rawBusUsageTasklet, transactionManager)
             .build();
+    }
+
+    @Bean
+    public CommandLineRunner rawBusUsageJobRunner(JobLauncher jobLauncher, Job rawBusUsageJob) {
+        return new RawBusUsageJobRunner(jobLauncher, rawBusUsageJob);
     }
 }
