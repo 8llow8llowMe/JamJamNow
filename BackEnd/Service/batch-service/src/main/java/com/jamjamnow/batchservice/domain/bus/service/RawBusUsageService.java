@@ -5,5 +5,5 @@ import java.util.List;
 
 public interface RawBusUsageService {
 
-    void saveAllForce(List<RawBusUsage> usages);
+    void saveAllIgnoreDuplicates(List<RawBusUsage> usages);
 }
