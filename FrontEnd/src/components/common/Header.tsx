@@ -36,7 +36,12 @@ const Header = () => {
 
   return (
     <div className="flex h-[80px] justify-between items-center px-10 border-b-2 border-b-[#333]">
-      <div className="text-[32px] font-semibold">JamJam</div>
+      <div
+        className="text-[32px] font-semibold cursor-pointer"
+        onClick={() => navigate("/")}
+      >
+        JamJam
+      </div>
       <div>
         <TabToggle
           tabs={["메인화면", "대시보드", "운전자 분석", "내 정보"]}

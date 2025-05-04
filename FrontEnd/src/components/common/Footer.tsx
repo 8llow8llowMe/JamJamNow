@@ -15,10 +15,13 @@ const Footer = () => {
             href="https://github.com/8llow8llowMe/JamJamNow"
             target="_blank"
             rel="noopener noreferrer"
+            className="hover:underline"
           >
             Github ⭐️ 서비스 운영과 발전에 큰 도움이 됩니다.
           </a>
-          <a href="mailto:nowdoboss@gmail.com">이메일 nowdoboss@gmail.com</a>
+          <a href="mailto:nowdoboss@gmail.com" className="hover:underline">
+            이메일 nowdoboss@gmail.com
+          </a>
         </div>
       </div>
     </div>
