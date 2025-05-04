@@ -1,4 +1,4 @@
-package com.jamjamnow.batchservice.global.infrastructor.batch.tasklet;
+package com.jamjamnow.batchservice.domain.bus.batch.tasklet;
 
 import com.jamjamnow.batchservice.domain.bus.entity.RawBusUsage;
 import com.jamjamnow.batchservice.domain.bus.service.RawBusUsageService;

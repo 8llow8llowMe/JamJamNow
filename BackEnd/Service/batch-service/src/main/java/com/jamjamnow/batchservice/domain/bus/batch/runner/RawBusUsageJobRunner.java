@@ -1,4 +1,4 @@
-package com.jamjamnow.batchservice.global.infrastructor.batch.runner;
+package com.jamjamnow.batchservice.domain.bus.batch.runner;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class RawBusUsageJobRunner implements CommandLineRunner {
             }
         }
 
-        // 2. 인자 없으면 실행하지 않음
+        // 2. 날짜는 필수
         if (oprYmd == null || oprYmd.isBlank()) {
             log.info("[CLI] --oprYmd 인자가 없으므로 배치 작업을 실행하지 않습니다.");
             return;
@@ -37,12 +37,16 @@ public class RawBusUsageJobRunner implements CommandLineRunner {
 
         log.info("[CLI] 수집 날짜: {}, 시도코드: {}", oprYmd, sidoArg);
 
-        JobParameters jobParameters = new JobParametersBuilder()
+        // 3. JobParametersBuilder 구성
+        JobParametersBuilder builder = new JobParametersBuilder()
             .addString("oprYmd", oprYmd)
-            .addString("sido", sidoArg)
-            .addLong("timestamp", System.currentTimeMillis())
-            .toJobParameters();
+            .addLong("timestamp", System.currentTimeMillis()); // 중복 방지용
 
+        if (sidoArg != null && !sidoArg.isBlank()) {
+            builder.addString("sido", sidoArg); // null일 경우 생략
+        }
+
+        JobParameters jobParameters = builder.toJobParameters();
         jobLauncher.run(rawBusUsageJob, jobParameters);
     }
 }
