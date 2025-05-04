@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,14 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_rawbususage_unique",
+            columnNames = {
+                "oprYmd", "emdCd", "rteId", "sttnId", "usersTypeNm"
+            }
+        )
+    },
     indexes = {
         @Index(name = "idx_oprYmd", columnList = "oprYmd"),
         @Index(name = "idx_ctpvCd", columnList = "ctpvCd"),
