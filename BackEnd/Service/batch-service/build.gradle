@@ -9,6 +9,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     // Spring Batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
+    // Apache Commons CSV
+    implementation 'org.apache.commons:commons-csv:1.14.0'
     // MySQL JDBC
     runtimeOnly 'com.mysql:mysql-connector-j'
 }
