@@ -6,7 +6,7 @@ import DashBoard from "@src/pages/DashBoard";
 import Analysis from "@src/pages/Analysis";
 import Profile from "@src/pages/Profile";
 
-function Router() {
+const Router = () => {
   return (
     <Routes>
       <Route element={<DefaultLayout />}>
@@ -27,6 +27,6 @@ function Router() {
       {/* <Route path="*" element={<Navigate to="/" />} /> */}
     </Routes>
   );
-}
+};
 
 export default Router;
