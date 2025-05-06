@@ -1,10 +1,10 @@
 const Footer = () => {
   return (
-    <div className="border-t-2 border-t-black text-sm text-gray-600 px-12 py-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+    <div className="text-sm text-gray-600 px-5 py-8">
+      <div className="sm:flex-row sm:justify-between flex flex-col gap-2">
         <div className="space-y-2">
           <p className="font-semibold text-gray-800">
-            Jamjam - 우리 동네 교통 스트레스 지수 분석 대시보드
+            JamJam - 우리 동네 교통 스트레스 지수 분석 대시보드
           </p>
           <div className="flex gap-3">
             <p>© 2025 팔로팔로미. All Rights Reserved.</p>

@@ -4,18 +4,17 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          light: "#4f46e5",
-          dark: "#818cf8",
-        },
-        background: {
-          light: "#ffffff",
-          dark: "#0f172a",
-        },
-        text: {
-          light: "#111827",
-          dark: "#e5e7eb",
-        },
+        primary: "var(--color-primary)",
+        background: "var(--color-background)",
+        text: "var(--color-text)",
+      },
+      fontSize: {
+        "2xs": "0.625rem", // 10px
+        "3xs": "0.5rem", // 8px
+      },
+      screens: {
+        "2xs": "320px", // 예: iPhone SE
+        xs: "480px", // 예: 작은 모바일
       },
     },
   },

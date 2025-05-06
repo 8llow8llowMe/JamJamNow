@@ -14,7 +14,7 @@ const TabToggle: React.FC<TabToggleProps> = ({ tabs, selected, onSelect }) => {
         <button
           key={tab}
           onClick={() => onSelect(tab)}
-          className={`px-6 py-2 rounded-full font-semibold transition-all duration-200
+          className={`sm:px-6 xs:px-4 px-2 sm:py-2 py-1.5 sm:text-sm xs:text-xs text-2xs rounded-full font-semibold transition-all duration-200
             ${selected === tab ? "bg-[#E3FF04] text-black" : "text-black hover:bg-[#EBF0F5]"}
           `}
         >

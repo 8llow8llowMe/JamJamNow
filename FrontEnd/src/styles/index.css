@@ -14,6 +14,17 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* 커스텀 color 추가 */
+  --color-primary: #4f46e5;
+  --color-background: #ffffff;
+  --color-text: #111827;
+}
+
+.dark {
+  --color-primary: #818cf8;
+  --color-background: #0f172a;
+  --color-text: #e5e7eb;
 }
 
 .theme-default {
@@ -22,4 +33,21 @@
 
 .theme-dark {
   @apply bg-gray-900 text-white;
+}
+
+@layer utilities {
+  .main-auto-height {
+    height: 100vh;
+  }
+
+  @media ((min-width: 640px) and (min-height: 1000px)) {
+    .main-auto-height {
+      height: calc(100vh - 120px);
+    }
+  }
+  @media ((max-width: 639px) and (min-height: 1000px)) {
+    .main-auto-height {
+      height: calc(100vh - 168px);
+    }
+  }
 }

@@ -35,9 +35,9 @@ const Header = () => {
   };
 
   return (
-    <div className="flex h-[80px] justify-between items-center px-10 border-b-2 border-b-[#333]">
+    <div className="flex h-[80px] justify-between items-center px-5">
       <div
-        className="text-[32px] font-semibold cursor-pointer"
+        className="sm:text-[32px] xs:text-[28px] text-[24px] sm:w-24 font-semibold cursor-pointer"
         onClick={() => navigate("/")}
       >
         JamJam
@@ -49,7 +49,8 @@ const Header = () => {
           onSelect={handleSelectTab}
         />
       </div>
-      <div className="rounded-full p-4 border bg-slate-100">My</div>
+      {/* <div className="rounded-full p-3 border bg-[#ddd9]">My</div> */}
+      <div className="md:flex hidden w-24"></div>
     </div>
   );
 };

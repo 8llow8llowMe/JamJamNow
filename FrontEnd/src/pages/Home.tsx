@@ -4,6 +4,7 @@ import { MapProvider } from "@src/contexts/MapProvider";
 import { useState } from "react";
 
 const Home = () => {
+  // TODO: store 추가 시 store에 저장
   const [latLngData, setLatLngData] = useState({
     lngNE: 127.22560147553521,
     latNE: 37.668539165787855,
@@ -11,6 +12,7 @@ const Home = () => {
     latSW: 37.46984057457333,
   });
 
+  // TODO: store 추가 시 함수 분리 후 store에 저장
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert("현재 위치를 지원하지 않는 브라우저입니다.");
@@ -37,16 +39,16 @@ const Home = () => {
   };
 
   return (
-    <div className="flex h-full p-5 space-x-5">
-      <div className="w-1/2 bg-blue-100">left container</div>
-      <div className="w-1/2">
+    <div className="flex md:flex-row flex-col-reverse h-full p-5 md:space-x-5 space-x-0">
+      <div className="md:w-1/2 md:h-full h-1/2 bg-blue-100">left container</div>
+      <div className="md:w-1/2 md:h-full h-1/2 md:mb-0 mb-5">
         <div className="relative flex w-full h-full justify-center items-center border-2 border-[#dbdbdb] rounded-[20px]">
           <MapProvider>
             <MapView latLngData={latLngData} />
           </MapProvider>
           <div
             title="현재 위치"
-            className="absolute z-10 p-1 bottom-2 right-2 bg-[#f9f9f9] rounded-md cursor-pointer"
+            className="absolute z-10 p-1 bottom-2 right-2 bg-[#f9f9f9] rounded-md cursor-pointer active:bg-[#efefef]"
             onClick={handleCurrentLocation}
           >
             <LocationIcon />
