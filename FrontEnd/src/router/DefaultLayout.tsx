@@ -2,7 +2,7 @@ import Footer from "@src/components/common/Footer";
 import Header from "@src/components/common/Header";
 import { Outlet } from "react-router-dom";
 
-export default function DefaultLayout() {
+const DefaultLayout = () => {
   return (
     // <div className={isDark ? "theme-dark" : "theme-default"}>
     <div className="mx-auto max-w-[1280px] justify-center">
@@ -17,4 +17,6 @@ export default function DefaultLayout() {
       </footer>
     </div>
   );
-}
+};
+
+export default DefaultLayout;

@@ -1,5 +1,5 @@
 import { useMap } from "@src/hooks/useMap";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 // type
 import { MapViewProps } from "@src/types/map";
 
@@ -40,4 +40,4 @@ const MapView = ({ latLngData }: MapViewProps) => {
   );
 };
 
-export default MapView;
+export default memo(MapView);
