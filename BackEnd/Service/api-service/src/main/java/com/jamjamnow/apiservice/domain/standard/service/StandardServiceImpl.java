@@ -26,7 +26,6 @@ public class StandardServiceImpl implements StandardService {
         List<Sido> sidos = sidoRepository.findAll();
         return sidos.stream()
             .map(sido -> SidoResponse.builder()
-                .sidoId(sido.getId())
                 .ctpvCd(sido.getCtpvCd())
                 .ctpvNm(sido.getCtpvNm())
                 .build()
@@ -39,7 +38,6 @@ public class StandardServiceImpl implements StandardService {
         List<Sgg> sggs = sggRepository.findBySido_CtpvCd(ctpvCd);
         return sggs.stream()
             .map(sgg -> SggResponse.builder()
-                .sggId(sgg.getId())
                 .sggCd(sgg.getSggCd())
                 .sggNm(sgg.getSggNm())
                 .build()
@@ -52,7 +50,6 @@ public class StandardServiceImpl implements StandardService {
         List<Emd> emds = emdRepository.findBySgg_SggCd(sggCd);
         return emds.stream()
             .map(emd -> EmdResponse.builder()
-                .emdId(emd.getId())
                 .emdCd(emd.getEmdCd())
                 .emdNm(emd.getEmdNm())
                 .build()
