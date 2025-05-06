@@ -3,9 +3,8 @@ package com.jamjamnow.batchservice.domain.bus.batch.tasklet;
 import com.jamjamnow.batchservice.domain.bus.entity.RawBusUsage;
 import com.jamjamnow.batchservice.domain.bus.service.RawBusUsageService;
 import com.jamjamnow.batchservice.global.infrastructor.openapi.DynamicOpenApiClient;
-import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.BusUsageItem;
-import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.OpenApiDynamicWrapper;
-import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.OpenApiResponse;
+import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.OpenApiGenericResponse;
+import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.bus.BusUsageItem;
 import com.jamjamnow.persistencemodule.domain.standard.entity.Sido;
 import com.jamjamnow.persistencemodule.domain.standard.repository.SidoRepository;
 import com.jamjamnow.persistencemodule.global.util.SnowflakeIdGenerator;
@@ -25,6 +24,7 @@ import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -32,6 +32,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RawBusUsageTasklet implements Tasklet {
 
+    public static final ParameterizedTypeReference<OpenApiGenericResponse<BusUsageItem>> BUS_USAGE_TYPE =
+        new ParameterizedTypeReference<>() {
+        };
+
+    private static final String CATEGORY = "bus";
+    private static final String NAME = "usage";
     // 동시 실행을 제한할 가상 스레드 세마포어 임계값 (한 번에 5개 페이지 처리)
     private static final int CONCURRENCY_LIMIT = 5;
 
@@ -116,17 +122,16 @@ public class RawBusUsageTasklet implements Tasklet {
                 "pageNo", String.valueOf(pageNo)
             );
 
-            OpenApiResponse res = Optional.ofNullable(
-                    openApiClient.fetch("transport", params, OpenApiDynamicWrapper.class))
-                .map(OpenApiDynamicWrapper::getFirstResponse)
-                .orElse(null);
+            OpenApiGenericResponse<BusUsageItem> response = openApiClient.fetch(CATEGORY, NAME,
+                params, BUS_USAGE_TYPE);
 
-            if (res == null || res.body() == null || res.body().items() == null) {
+            if (response == null || response.body() == null || response.body().items() == null) {
                 return 0;
             }
 
-            List<BusUsageItem> items = Optional.ofNullable(res.body().items().item())
+            List<BusUsageItem> items = Optional.ofNullable(response.body().items().item())
                 .orElse(List.of());
+
             if (items.isEmpty()) {
                 return 0;
             }
@@ -166,16 +171,14 @@ public class RawBusUsageTasklet implements Tasklet {
                 "pageNo", "1"
             );
 
-            OpenApiResponse res = Optional.ofNullable(
-                    openApiClient.fetch("transport", params, OpenApiDynamicWrapper.class))
-                .map(OpenApiDynamicWrapper::getFirstResponse)
-                .orElse(null);
+            OpenApiGenericResponse<BusUsageItem> response = openApiClient.fetch(CATEGORY, NAME,
+                params, BUS_USAGE_TYPE);
 
-            if (res == null || res.body() == null || res.body().totalCount() <= 0) {
+            if (response == null || response.body() == null || response.body().items() == null) {
                 return 0;
             }
 
-            int totalCount = res.body().totalCount();
+            int totalCount = response.body().totalCount();
             int totalPages = (int) Math.ceil(totalCount / 100.0);
             log.info("[Batch] 시도={} 날짜={} 전체 건수={}, 총 페이지={}", ctpvCd, oprYmd, totalCount,
                 totalPages);
