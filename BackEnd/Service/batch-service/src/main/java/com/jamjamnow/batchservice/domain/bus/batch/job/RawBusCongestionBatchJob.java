@@ -1,6 +1,6 @@
 package com.jamjamnow.batchservice.domain.bus.batch.job;
 
-import com.jamjamnow.batchservice.domain.bus.batch.tasklet.RawBusUsageTasklet;
+import com.jamjamnow.batchservice.domain.bus.batch.tasklet.RawBusCongestionTasklet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -13,28 +13,29 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @RequiredArgsConstructor
-public class RawBusUsageBatchJob {
+public class RawBusCongestionBatchJob {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final RawBusUsageTasklet rawBusUsageTasklet;
+    private final RawBusCongestionTasklet rawBusCongestionTasklet;
 
     @Bean
-    public Job rawBusUsageJob() {
-        return new JobBuilder("rawBusUsageJob", jobRepository)
-            .start(rawBusUsageStep())
+    public Job rawBusCongestionJob() {
+        return new JobBuilder("rawBusCongestionJob", jobRepository)
+            .start(rawBusCongestionStep())
             .build();
     }
 
     @Bean
-    public Step rawBusUsageStep() {
-        return new StepBuilder("rawBusUsageStep", jobRepository)
-            .tasklet(rawBusUsageTasklet, transactionManager)
+    public Step rawBusCongestionStep() {
+        return new StepBuilder("rawBusCongestionStep", jobRepository)
+            .tasklet(rawBusCongestionTasklet, transactionManager)
             .build();
     }
 
 //    @Bean
-//    public CommandLineRunner rawBusUsageJobRunner(JobLauncher jobLauncher, Job rawBusUsageJob) {
-//        return new RawBusUsageJobRunner(jobLauncher, rawBusUsageJob);
+//    public CommandLineRunner rawBusCongestionJobRunner(JobLauncher jobLauncher,
+//        Job rawBusCongestionJob) {
+//        return new RawBusCongestionJobRunner(jobLauncher, rawBusCongestionJob);
 //    }
 }
