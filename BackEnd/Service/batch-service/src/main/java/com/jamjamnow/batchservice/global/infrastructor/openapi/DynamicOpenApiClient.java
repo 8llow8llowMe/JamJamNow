@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -23,37 +24,34 @@ public class DynamicOpenApiClient {
     private final WebClient webClient;
     private final OpenApiRegistryProperties registry;
 
-    public <T> T fetch(String apiName, Map<String, String> additionalParams,
-        Class<T> responseType) {
+    public <T> T fetch(String category, String name, Map<String, String> params,
+        ParameterizedTypeReference<T> responseType) {
 
-        OpenApiRegistryProperties.OpenApiSpec spec =
-            Optional.ofNullable(registry.apis().get(apiName))
-                .orElseThrow(() -> new IllegalArgumentException("등록되지 않은 OpenAPI: " + apiName));
+        // 1. 카테고리 + 이름으로 OpenAPI 정의 가져오기
+        OpenApiRegistryProperties.OpenApiSpec spec = Optional.ofNullable(
+                registry.categories().get(category).apis().get(name))
+            .orElseThrow(
+                () -> new IllegalArgumentException("등록되지 않은 OpenAPI: " + category + "." + name));
 
+        // 2. 기본 파라미터 + 추가 파라미터 병합
         Map<String, String> mergedParams = new HashMap<>(spec.defaultParams());
-        if (additionalParams != null) {
-            mergedParams.putAll(additionalParams);
+        if (params != null) {
+            mergedParams.putAll(params);
         }
 
+        // 3. URI 구성
         String encodedServiceKey = URLEncoder.encode(spec.serviceKey(), StandardCharsets.UTF_8);
-        log.info("Encoded serviceKey: {}", encodedServiceKey);
-
-        Map<String, String> otherParams = new HashMap<>(mergedParams);
-        otherParams.remove("serviceKey");
-
         UriComponentsBuilder builder = UriComponentsBuilder
             .fromUriString(spec.url())
             .queryParam("serviceKey", encodedServiceKey);
 
-        for (Map.Entry<String, String> entry : otherParams.entrySet()) {
-            builder.queryParam(entry.getKey(), entry.getValue());
-        }
+        mergedParams.remove("serviceKey"); // 중복 방지
+        mergedParams.forEach(builder::queryParam);
 
-        String fullUrl = builder.build(false).toUriString();
-        URI uri = URI.create(fullUrl);
-        log.info("API 요청 URL: {}", uri);
+        URI uri = URI.create(builder.build(false).toUriString());
+        log.info("OpenAPI 요청 URI [{}]: {}", name, uri);
 
-        // 6. Content-Type 검사 후 XML 응답 무시 (null 반환)
+        // 4. 요청 전송 및 JSON 응답 처리
         return webClient.get()
             .uri(uri)
             .accept(MediaType.APPLICATION_JSON)
@@ -61,11 +59,10 @@ public class DynamicOpenApiClient {
                 MediaType contentType = response.headers().contentType()
                     .orElse(MediaType.APPLICATION_OCTET_STREAM);
 
-                if (contentType.includes(MediaType.APPLICATION_XML) || contentType.includes(
-                    MediaType.TEXT_XML)) {
+                if (contentType.includes(MediaType.APPLICATION_XML)) {
                     return response.bodyToMono(String.class)
-                        .doOnNext(body -> log.warn("[OpenAPI] XML 응답 감지 - 무시됨. body=\n{}", body))
-                        .then(Mono.empty());  // XML 응답은 무시
+                        .doOnNext(body -> log.warn("[OpenAPI] XML 응답 무시됨 - body: \n{}", body))
+                        .then(Mono.empty());
                 }
 
                 return response.bodyToMono(responseType);
