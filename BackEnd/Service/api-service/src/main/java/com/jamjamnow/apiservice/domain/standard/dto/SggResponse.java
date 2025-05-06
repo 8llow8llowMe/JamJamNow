@@ -4,7 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record SggResponse(
-    long sggId,
     String sggCd,
     String sggNm
 ) {
