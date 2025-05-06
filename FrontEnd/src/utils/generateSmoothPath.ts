@@ -9,33 +9,39 @@ const generateSmoothPath = (
 ): string => {
   if (data.length !== 20) throw new Error("Data must be 20 points");
 
+  const round2 = (num: number) => Math.round(num * 100) / 100;
   const xGap = width / (data.length - 1);
 
   const points = data.map((value, index) => {
-    const x = xGap * index;
-    const y = height * (1 - value / 100);
+    const x = round2(xGap * index);
+    const y = round2(height * (1 - value / 100));
     return { x, y };
   });
 
-  let d = `M ${points[0].x},${points[0].y}`;
+  const path = [`M ${points[0].x},${points[0].y}`];
 
-  for (let i = 1; i < points.length - 1; i++) {
-    // const prev = points[i - 1];
-    const curr = points[i];
-    const next = points[i + 1];
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[i - 1] || points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1] || points[i];
+    const p3 = points[i + 2] || p2;
 
-    // Quadratic smoothing method (중간점을 control point처럼 사용)
-    const midX = (curr.x + next.x) / 2;
-    const midY = (curr.y + next.y) / 2;
+    const control1 = {
+      x: round2(p1.x + (p2.x - p0.x) / 6),
+      y: round2(p1.y + (p2.y - p0.y) / 6),
+    };
 
-    d += ` Q ${curr.x},${curr.y} ${midX},${midY}`;
+    const control2 = {
+      x: round2(p2.x - (p3.x - p1.x) / 6),
+      y: round2(p2.y - (p3.y - p1.y) / 6),
+    };
+
+    path.push(
+      `C ${control1.x},${control1.y} ${control2.x},${control2.y} ${p2.x},${p2.y}`
+    );
   }
 
-  // 마지막 점은 직선으로 마무리
-  const last = points[points.length - 1];
-  d += ` T ${last.x},${last.y}`;
-
-  return d;
+  return path.join(" ");
 };
 
 export default generateSmoothPath;
