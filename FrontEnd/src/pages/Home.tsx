@@ -1,5 +1,6 @@
 import { LocationIcon } from "@src/assets/icon";
 import CongestionCard from "@src/components/card/CongestionCard";
+import RainbowCard from "@src/components/card/RainbowCard";
 import MapView from "@src/components/map/MapView";
 import MapProvider from "@src/contexts/MapProvider";
 import { useState } from "react";
@@ -41,8 +42,9 @@ const Home = () => {
 
   return (
     <div className="flex md:flex-row flex-col-reverse h-full p-5 md:space-x-5 space-x-0">
-      <div className="md:w-1/2 md:h-full h-1/2 bg-blue-100">
+      <div className="md:w-1/2 md:h-full h-1/2 bg-blue-100 space-y-5">
         <CongestionCard />
+        <RainbowCard />
         <div>left container </div>
       </div>
       <div className="md:w-1/2 md:h-full h-1/2 md:mb-0 mb-5">
