@@ -16,15 +16,15 @@ const CongestionCard = () => {
   const height = 250;
   const data = [
     65, 70, 14, 40, 30, 20, 15, 10, 5, 10, 20, 30, 40, 60, 80, 90, 75, 60, 40,
-    20,
+    0,
   ];
   const data2 = [
     26, 75, 57, 86, 24, 67, 98, 66, 44, 3, 78, 46, 45, 89, 54, 34, 89, 54, 33,
-    67,
+    0,
   ];
 
-  const pathD1 = generateSmoothPath(data, width, height);
-  const pathD2 = generateSmoothPath(data2, width, height);
+  const pathD1 = generateSmoothPath(data, width, height - 25);
+  const pathD2 = generateSmoothPath(data2, width, height - 25);
 
   const scrollRef = useDragLineChart();
 
@@ -41,9 +41,9 @@ const CongestionCard = () => {
 
     currentHoverIndex.current = index;
 
-    const x = index * xGap;
-    const y1 = height * (1 - data[index] / 100);
-    const y2 = height * (1 - data2[index] / 100);
+    const x = 6 + index * xGap;
+    const y1 = 25 + (height - 25) * (1 - data[index] / 100);
+    const y2 = 25 + (height - 25) * (1 - data2[index] / 100);
 
     // data1
     if (indicatorRef.current) {
@@ -130,28 +130,49 @@ const CongestionCard = () => {
                   strokeDasharray="10 10"
                 />
               </pattern>
+              <linearGradient
+                id="fadeRightWhite"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stop-color="white" stop-opacity="0" />
+                <stop offset="100%" stop-color="white" stop-opacity="1" />
+              </linearGradient>
             </defs>
-            <rect width="100%" height={height} fill="url(#dotLine)" />
-            <text x="45" y="15" fill="#333" fontSize={14} fontWeight={500}>
-              8:00
-            </text>
-            <text x="163" y="15" fill="#333" fontSize={14} fontWeight={500}>
-              12:00
-            </text>
-            <text x="283" y="15" fill="#333" fontSize={14} fontWeight={500}>
-              16:00
-            </text>
-            <text x="402" y="15" fill="#333" fontSize={14} fontWeight={500}>
-              20:00
-            </text>
-            <text x="522" y="15" fill="#333" fontSize={14} fontWeight={500}>
-              24:00
-            </text>
-            {/* 버스 혼잡도 (green line) */}
-            <path d={pathD1} fill="none" stroke="#22c55e" strokeWidth="3" />
+            <g transform="translate(6, 0)">
+              <rect width="100%" height={height} fill="url(#dotLine)" />
+              <text x="45" y="15" fill="#333" fontSize={14} fontWeight={500}>
+                8:00
+              </text>
+              <text x="163" y="15" fill="#333" fontSize={14} fontWeight={500}>
+                12:00
+              </text>
+              <text x="283" y="15" fill="#333" fontSize={14} fontWeight={500}>
+                16:00
+              </text>
+              <text x="402" y="15" fill="#333" fontSize={14} fontWeight={500}>
+                20:00
+              </text>
+              <text x="522" y="15" fill="#333" fontSize={14} fontWeight={500}>
+                24:00
+              </text>
+            </g>
+            <g transform="translate(6, 25)">
+              {/* 버스 혼잡도 (green line) */}
+              <path d={pathD1} fill="none" stroke="#22c55e" strokeWidth="3" />
 
-            {/* 지하철 혼잡도 (red line) */}
-            <path d={pathD2} fill="none" stroke="#ef4444" strokeWidth="3" />
+              {/* 지하철 혼잡도 (red line) */}
+              <path d={pathD2} fill="none" stroke="#ef4444" strokeWidth="3" />
+              <rect
+                className=""
+                x={542}
+                width={25}
+                height={225}
+                fill="url(#fadeRightWhite)"
+              />
+            </g>
             {/* hover indicator - data1 */}
             <circle
               ref={indicatorRef}
