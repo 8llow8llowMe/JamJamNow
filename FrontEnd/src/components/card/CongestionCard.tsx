@@ -14,6 +14,7 @@ const CongestionCard = () => {
 
   const width = 570;
   const height = 250;
+  const numderDeps = (width / 19) * 4;
   const data = [
     65, 70, 14, 40, 30, 20, 15, 10, 5, 10, 20, 30, 40, 60, 80, 90, 75, 60, 40,
     0,
@@ -103,7 +104,9 @@ const CongestionCard = () => {
         ref={scrollRef}
         className="relative w-full overflow-x-auto scrollbar-hide"
       >
-        <div className="relative min-w-[570px] h-[250px]">
+        <div
+          className={`relative min-w-[${width}px] h-[${height}px] cursor-move`}
+        >
           <svg
             width={width}
             height={height}
@@ -116,7 +119,7 @@ const CongestionCard = () => {
             <defs>
               <pattern
                 id="dotLine"
-                width="30"
+                width={width / 19}
                 height={height}
                 patternUnits="userSpaceOnUse"
               >
@@ -143,19 +146,49 @@ const CongestionCard = () => {
             </defs>
             <g transform="translate(6, 0)">
               <rect width="100%" height={height} fill="url(#dotLine)" />
-              <text x="45" y="15" fill="#333" fontSize={14} fontWeight={500}>
+              <text
+                x={45 + numderDeps * 0}
+                y="15"
+                fill="#333"
+                fontSize={14}
+                fontWeight={500}
+              >
                 8:00
               </text>
-              <text x="163" y="15" fill="#333" fontSize={14} fontWeight={500}>
+              <text
+                x={45 + numderDeps * 1}
+                y="15"
+                fill="#333"
+                fontSize={14}
+                fontWeight={500}
+              >
                 12:00
               </text>
-              <text x="283" y="15" fill="#333" fontSize={14} fontWeight={500}>
+              <text
+                x={45 + numderDeps * 2}
+                y="15"
+                fill="#333"
+                fontSize={14}
+                fontWeight={500}
+              >
                 16:00
               </text>
-              <text x="402" y="15" fill="#333" fontSize={14} fontWeight={500}>
+              <text
+                x={45 + numderDeps * 3}
+                y="15"
+                fill="#333"
+                fontSize={14}
+                fontWeight={500}
+              >
                 20:00
               </text>
-              <text x="522" y="15" fill="#333" fontSize={14} fontWeight={500}>
+              <text
+                x={45 + numderDeps * 4}
+                y="15"
+                fill="#333"
+                fontSize={14}
+                fontWeight={500}
+              >
                 24:00
               </text>
             </g>
@@ -167,9 +200,9 @@ const CongestionCard = () => {
               <path d={pathD2} fill="none" stroke="#ef4444" strokeWidth="3" />
               <rect
                 className=""
-                x={542}
+                x={width - 28}
                 width={25}
-                height={225}
+                height={height - 25}
                 fill="url(#fadeRightWhite)"
               />
             </g>
