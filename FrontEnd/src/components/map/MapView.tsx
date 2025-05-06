@@ -1,5 +1,5 @@
+import { useMap } from "@src/hooks/useMap";
 import { useEffect, useRef } from "react";
-import { useMap } from "@src/contexts/MapContext";
 
 export default function MapView() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -16,7 +16,9 @@ export default function MapView() {
 
     const mapInstance = new window.kakao.maps.Map(mapRef.current, options);
     setMap(mapInstance);
-  }, [isLoaded]);
+  }, [isLoaded, setMap]);
 
-  return <div ref={mapRef} className="w-full h-full" id="kakao-map" />;
+  return (
+    <div ref={mapRef} className="w-full h-full rounded-[20px]" id="kakao-map" />
+  );
 }

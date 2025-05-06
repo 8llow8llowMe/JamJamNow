@@ -5,3 +5,9 @@ export type LatLngDataType = {
   lngSW: number;
   latSW: number;
 };
+
+export type MapContextType = {
+  map: kakao.maps.Map | null;
+  setMap: (map: kakao.maps.Map) => void;
+  isLoaded: boolean;
+};
