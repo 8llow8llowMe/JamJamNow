@@ -105,7 +105,8 @@ const CongestionCard = () => {
         className="relative w-full overflow-x-auto scrollbar-hide"
       >
         <div
-          className={`relative min-w-[${width}px] h-[${height}px] cursor-move`}
+          className="relative cursor-move"
+          style={{ minWidth: `${width}px`, height: `${height}px` }}
         >
           <svg
             width={width}
@@ -140,8 +141,8 @@ const CongestionCard = () => {
                 x2="100%"
                 y2="0%"
               >
-                <stop offset="0%" stop-color="white" stop-opacity="0" />
-                <stop offset="100%" stop-color="white" stop-opacity="1" />
+                <stop offset="0%" stopColor="white" stopOpacity="0" />
+                <stop offset="100%" stopColor="white" stopOpacity="1" />
               </linearGradient>
             </defs>
             <g transform="translate(6, 0)">
