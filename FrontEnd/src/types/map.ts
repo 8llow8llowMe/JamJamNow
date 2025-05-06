@@ -11,3 +11,6 @@ export type MapContextType = {
   setMap: (map: kakao.maps.Map) => void;
   isLoaded: boolean;
 };
+export type MapViewProps = {
+  latLngData: LatLngDataType;
+};
