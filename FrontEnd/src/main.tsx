@@ -1,14 +1,20 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-// style
-import "./styles/index.css";
-import App from "./App.tsx";
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import { Providers, ReactQueryProvider } from '@src/redux/provider.tsx'
+import App from './App.tsx'
 
-createRoot(document.getElementById("root")!).render(
+// style
+import './styles/index.css'
+
+createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </StrictMode>
-);
+    <ReactQueryProvider>
+      <Providers>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </Providers>
+    </ReactQueryProvider>
+  </StrictMode>,
+)
