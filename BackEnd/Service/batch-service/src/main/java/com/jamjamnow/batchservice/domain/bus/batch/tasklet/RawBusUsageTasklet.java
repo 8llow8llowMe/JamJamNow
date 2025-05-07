@@ -4,12 +4,14 @@ import com.jamjamnow.batchservice.domain.bus.entity.RawBusUsage;
 import com.jamjamnow.batchservice.domain.bus.service.RawBusUsageService;
 import com.jamjamnow.batchservice.global.infrastructor.openapi.DynamicOpenApiClient;
 import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.OpenApiGenericResponse;
+import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.OpenApiGenericResponse.Body;
+import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.OpenApiGenericResponse.Body.Items;
+import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.OpenApiRoot;
 import com.jamjamnow.batchservice.global.infrastructor.openapi.dto.bus.BusUsageItem;
 import com.jamjamnow.persistencemodule.domain.standard.entity.Sido;
 import com.jamjamnow.persistencemodule.domain.standard.repository.SidoRepository;
 import com.jamjamnow.persistencemodule.global.util.SnowflakeIdGenerator;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +19,6 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RawBusUsageTasklet implements Tasklet {
 
-    public static final ParameterizedTypeReference<OpenApiGenericResponse<BusUsageItem>> BUS_USAGE_TYPE =
+    public static final ParameterizedTypeReference<OpenApiRoot<BusUsageItem>> BUS_USAGE_TYPE =
         new ParameterizedTypeReference<>() {
         };
 
@@ -55,63 +56,38 @@ public class RawBusUsageTasklet implements Tasklet {
 
         // 2. 수집 대상 시도코드 목록 결정 (입력 없으면 전체 시도)
         List<String> targetSidoCodes = getTargetSidoCodes(sidoParam);
-        log.info("[Batch] oprYmd={}, 시도코드 목록={}", oprYmd, targetSidoCodes);
+        log.info("[Batch] [BusUsage] 수집 시작 - oprYmd={}, 시도코드={}", oprYmd, targetSidoCodes);
 
-        // 3, 시도코드별로 OpenAPI 병렬 수집 처리
-        for (String ctpvCd : targetSidoCodes) {
-            collectByRegionVirtual(ctpvCd, oprYmd);
+        // 3. 가상 스레드 기반 Executor 생성
+        try (ExecutorService executor = Executors.newThreadPerTaskExecutor(
+            Thread.ofVirtual().factory())) {
+            List<CompletableFuture<Void>> tasks = targetSidoCodes.stream()
+                .map(ctpvCd -> CompletableFuture.runAsync(() -> collectBySido(ctpvCd, oprYmd),
+                    executor))
+                .toList();
+
+            // 4. 모든 시도코드 수집 완료 대기
+            CompletableFuture.allOf(tasks.toArray(new CompletableFuture[0])).join();
         }
 
         return RepeatStatus.FINISHED;
     }
 
-    private void collectByRegionVirtual(String ctpvCd, String oprYmd) throws InterruptedException {
-        log.info("[Batch] 시도코드={} 날짜={} 수집 시작", ctpvCd, oprYmd);
+    private void collectBySido(String ctpvCd, String oprYmd) {
+        log.info("[Batch] [BusUsage] 시작 - 시도코드={} 날짜={}", ctpvCd, oprYmd);
 
-        // 1. OpenAPI 첫 페이지 호출로 총 페이지 수 획득
-        int totalPages = getTotalPages(ctpvCd, oprYmd);
-        if (totalPages == 0) {
-            log.warn("[Batch] 수집할 데이터 없음 - 시도코드={} 날짜={}", ctpvCd, oprYmd);
-            return;
+        int page = 1;
+        int totalSaved = 0;
+
+        while (true) {
+            int saved = fetchAndSave(ctpvCd, oprYmd, page++);
+            if (saved == 0) {
+                break;
+            }
+            totalSaved += saved;
         }
 
-        // 2. JAVA 21 가상 스레드 기반 Executor 생성
-        Semaphore semaphore = new Semaphore(CONCURRENCY_LIMIT); // 동시 실행 제한
-        ExecutorService virtualThreadExecutor = Executors.newThreadPerTaskExecutor(
-            Thread.ofVirtual().factory());
-        List<CompletableFuture<Integer>> futures = new ArrayList<>();
-
-        // 3. 페이지 수만큼 fetch 작업을 CompletableFuture + Virtual Thread로 등록
-        for (int pageNo = 1; pageNo <= totalPages; pageNo++) {
-            final int finalPage = pageNo;
-            semaphore.acquire();
-
-            // 4. 비동기 가상 스레드로 fetch + 저장 수행
-            CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
-                try {
-                    return fetchAndSave(ctpvCd, oprYmd, finalPage); // 개별 페이지 수집 및 저장
-                } finally {
-                    semaphore.release(); // 작업 완료 시 세마포어 반환
-                }
-            }, virtualThreadExecutor);
-
-            futures.add(future);
-        }
-
-        // 5. 모든 페이지 작업 완료 후 결과 수집 (join 사용)
-        int totalSaved = futures.stream()
-            .mapToInt(f -> {
-                try {
-                    return f.join();
-                } catch (Exception e) {
-                    log.error("[Batch] 수집 중 오류", e);
-                    return 0;
-                }
-            }).sum();
-
-        // 6. 가상 스레드 Excutor 종료
-        virtualThreadExecutor.shutdown();
-        log.info("[Batch] 시도코드={} 날짜={} 최종 저장 건수={}", ctpvCd, oprYmd, totalSaved);
+        log.info("[Batch] [BusUsage] 완료 - 시도코드={} 날짜={} 저장 건수={}", ctpvCd, oprYmd, totalSaved);
     }
 
     private int fetchAndSave(String ctpvCd, String oprYmd, int pageNo) {
@@ -122,14 +98,14 @@ public class RawBusUsageTasklet implements Tasklet {
                 "pageNo", String.valueOf(pageNo)
             );
 
-            OpenApiGenericResponse<BusUsageItem> response = openApiClient.fetch(CATEGORY, NAME,
-                params, BUS_USAGE_TYPE);
+            OpenApiGenericResponse<BusUsageItem> response = openApiClient
+                .fetch(CATEGORY, NAME, params, BUS_USAGE_TYPE)
+                .response();
 
-            if (response == null || response.body() == null || response.body().items() == null) {
-                return 0;
-            }
-
-            List<BusUsageItem> items = Optional.ofNullable(response.body().items().item())
+            List<BusUsageItem> items = Optional.ofNullable(response)
+                .map(OpenApiGenericResponse::body)
+                .map(Body::items)
+                .map(Items::item)
                 .orElse(List.of());
 
             if (items.isEmpty()) {
@@ -154,50 +130,19 @@ public class RawBusUsageTasklet implements Tasklet {
                     .build())
                 .toList();
 
-            rawBusUsageService.saveAllIgnoreDuplicates(entities);
+            rawBusUsageService.saveAll(entities);
             return entities.size();
 
         } catch (Exception e) {
-            log.error("[Batch] 시도={} 날짜={} page={} 수집 중 에러", ctpvCd, oprYmd, pageNo, e);
-            return 0;
-        }
-    }
-
-    private int getTotalPages(String ctpvCd, String oprYmd) {
-        try {
-            Map<String, String> params = Map.of(
-                "opr_ymd", oprYmd,
-                "ctpv_cd", ctpvCd,
-                "pageNo", "1"
-            );
-
-            OpenApiGenericResponse<BusUsageItem> response = openApiClient.fetch(CATEGORY, NAME,
-                params, BUS_USAGE_TYPE);
-
-            if (response == null || response.body() == null || response.body().items() == null) {
-                return 0;
-            }
-
-            int totalCount = response.body().totalCount();
-            int totalPages = (int) Math.ceil(totalCount / 100.0);
-            log.info("[Batch] 시도={} 날짜={} 전체 건수={}, 총 페이지={}", ctpvCd, oprYmd, totalCount,
-                totalPages);
-            return totalPages;
-
-        } catch (Exception e) {
-            log.error("[Batch] 시도={} 날짜={} 전체 페이지 조회 실패", ctpvCd, oprYmd, e);
+            log.error("[Batch] [BusUsage] 오류 - 시도={} 날짜={} page={}", ctpvCd, oprYmd, pageNo, e);
             return 0;
         }
     }
 
     private List<String> getTargetSidoCodes(String sidoParam) {
-        if (sidoParam != null && !sidoParam.isBlank()) {
-            return Arrays.stream(sidoParam.split(",")).map(String::trim).toList();
-        } else {
-            return sidoRepository.findAll().stream()
-                .map(Sido::getCtpvCd)
-                .toList();
-        }
+        return (sidoParam != null && !sidoParam.isBlank())
+            ? Arrays.stream(sidoParam.split(",")).map(String::trim).toList()
+            : sidoRepository.findAll().stream().map(Sido::getCtpvCd).toList();
     }
 
     private LocalDate parseDate(String yyyymmdd) {
