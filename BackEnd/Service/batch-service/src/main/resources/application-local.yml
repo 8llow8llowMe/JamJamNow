@@ -25,12 +25,37 @@ spring:
           batch_size: 100
         default_batch_fetch_size: 100
 
-# 대중교통 관련 API
+# 공공데이터 포털 관련 OPEN API
 openapi:
-  apis:
-    transport:
-      url: ENC(rAOJsN987HutKijmqIdhIl2xqEh2edjHqj5OzGjtzUFB+tdTE8uF84tnxZBeWu9ew4hXJsMwsfJP/0TNqudkr76EhLk9URTyn3hWHScj70TnnV8IUcs4bygQCmTCRUStNyYBuUJEKiqIEEPcLOhmglZIHOQKXKih)
-      service-key: ENC(F5WRR9ds01ojd6rKF0pNeBKrMsVMJIoVDiYmoxi1c+TEwE+yXK+xXWqduM8BWGy4SgUwbdND56RnsazsW/KuGW2YuXwLHZvp5iJ2ZPMfZ6l2INfTGlKaFQK4SqWmd8+hhhdBg/6OxfY=)
-      defaultParams:
-        numOfRows: "100"
-        dataType: JSON
+  categories:
+    # 버스 관련
+    bus:
+      apis:
+        # 국토교통부 대중교통 이용인원수
+        usage:
+          url: ENC(rAOJsN987HutKijmqIdhIl2xqEh2edjHqj5OzGjtzUFB+tdTE8uF84tnxZBeWu9ew4hXJsMwsfJP/0TNqudkr76EhLk9URTyn3hWHScj70TnnV8IUcs4bygQCmTCRUStNyYBuUJEKiqIEEPcLOhmglZIHOQKXKih)
+          service-key: ENC(F5WRR9ds01ojd6rKF0pNeBKrMsVMJIoVDiYmoxi1c+TEwE+yXK+xXWqduM8BWGy4SgUwbdND56RnsazsW/KuGW2YuXwLHZvp5iJ2ZPMfZ6l2INfTGlKaFQK4SqWmd8+hhhdBg/6OxfY=)
+          defaultParams:
+            numOfRows: "100"
+            dataType: JSON
+        # 국토교통부 노선별 혼잡도
+        congestion:
+          url: ENC(mWEsSAqKneiTDKDxvUff6vsBn2tJ19wRdaX4J2NnMpTOjTetVuKaF9wz9BeXLlYIEEdQnT7NmHbK+xvpuAN0oqZOtzVPGcmb5EuHOl3W3l6sSKiXKM5ZDw==)
+          service-key: ENC(uSHMvpGDKuPrFmlzszfvRkE4hHWZ2zZjkcY5QOINioglbCXPXY1TC5ygck9AQ8BUGvJrV7lNkP84LYq5LqVlIc3pKWgoLi9n82vZDHES4h4utZr+ww13EIuFDB3VuMbmoZYMrVhB5U0=)
+          default-params:
+            numOfRows: "100"
+            dataType: JSON
+        # 국토교통부 노선별 차내 재차인원
+        reboarding:
+          url: ENC(jUB21jHl7xzwihHqYKSYyxWJf40nPIZMMykLZbsmq8C3dw+mFu0UTwRb2r+t9mZl47Ae3m0yRXTTo2ZD06e2o8j2quY9XXXdEEeXXTr4fQ+XSkZSYpXPyvZeNYJFbK8MBGbN9Sgyq2iPelY+OkqB7w==)
+          service-key: ENC(VAM+Xer/+kWcg/qjRYfduzHo/MQMd+XCI+p6owtiD/F9w8soLa/SU485u/FNaeVLQqzynFXKkJ7l7nvYsaTTIvOlppAyw5LE1Tmb8JVg4CLzzfl82L2TeM4XSOZb96mpk6ed+fzJCZk=)
+          default-params:
+            numOfRows: "100"
+            dataType: JSON
+        # 국토교통부 환승통행량
+        transferVolume:
+          url: ENC(gVfADaznHbn0YE+bI1dtWyU4D9LWggU7cohTZcCyqxVeTJngP4SVVuHyr30hC61PSz/KjR3IxuTZbMuXG5JtmO1ACNBfVyFfvo4kB06RfpO+x6AXX1kjMA==)
+          service-key: ENC(MUTM9EOpph8derYure3cr2Lso+SKMYPXfb07mlG2RM5wGP+comqFIT0yizjtDVdJBDOlfk9tMvYJEaKk/zUTvmtdyQB4iQANe153/2ayj62HbeJnEkogMbq1eqhFSqlZwAhTj4Eh/qk=)
+          default-params:
+            numOfRows: "100"
+            dataType: JSON
