@@ -1,6 +1,7 @@
 import { LocationIcon } from "@src/assets/icon";
 import CongestionCard from "@src/components/card/CongestionCard";
 import RainbowCard from "@src/components/card/RainbowCard";
+import SemiCircleCard from "@src/components/card/SemiCircleCard";
 import MapView from "@src/components/map/MapView";
 import MapProvider from "@src/contexts/MapProvider";
 import { useState } from "react";
@@ -41,14 +42,15 @@ const Home = () => {
   };
 
   return (
-    <div className="flex md:flex-row flex-col-reverse h-full p-5 md:space-x-5 space-x-0">
-      <div className="md:w-1/2 md:h-full h-1/2 bg-blue-100 space-y-5">
+    <div className="flex md:flex-row flex-col-reverse min-h-screen h-[calc(200vh)] p-5 space-x-0 md:space-x-5">
+      <div className="md:w-1/2 md:h-full h-1/2 flex flex-col overflow-y-auto space-y-5 bg-blue-100 scrollbar-hide">
         <CongestionCard />
         <RainbowCard />
-        <div>left container </div>
+        <SemiCircleCard />
+        <div className="h-[300px]">left container</div>
       </div>
-      <div className="md:w-1/2 md:h-full h-1/2 md:mb-0 mb-5">
-        <div className="relative flex w-full h-full justify-center items-center border-2 border-[#dbdbdb] rounded-[20px]">
+      <div className="md:w-1/2 relative md:h-full h-1/2 md:mb-0 mb-5">
+        <div className="sticky top-5 border-2 border-[#dbdbdb] rounded-[20px] md:h-[calc(100vh-100px)] h-full">
           <MapProvider>
             <MapView latLngData={latLngData} />
           </MapProvider>
