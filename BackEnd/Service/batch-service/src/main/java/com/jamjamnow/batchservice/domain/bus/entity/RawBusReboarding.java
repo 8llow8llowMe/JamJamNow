@@ -3,6 +3,8 @@ package com.jamjamnow.batchservice.domain.bus.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,6 +18,11 @@ import org.hibernate.annotations.Comment;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+    indexes = {
+        @Index(name = "idx_opr_ctpv_sgg", columnList = "oprYmd, ctpvCd, sggCd")
+    }
+)
 public class RawBusReboarding {
 
     @Id
