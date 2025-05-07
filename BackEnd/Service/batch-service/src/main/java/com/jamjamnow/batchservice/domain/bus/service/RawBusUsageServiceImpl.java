@@ -20,9 +20,9 @@ public class RawBusUsageServiceImpl implements RawBusUsageService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // 유효성 검사 -> 2. 중복은 DB 유니크 제약 조건(INSERT IGNORE)으로 처리
+    // 유효성 검사
     @Override
-    public void saveAllIgnoreDuplicates(List<RawBusUsage> usages) {
+    public void saveAll(List<RawBusUsage> usages) {
         if (usages == null || usages.isEmpty()) {
             return;
         }
@@ -41,9 +41,9 @@ public class RawBusUsageServiceImpl implements RawBusUsageService {
             return;
         }
 
-        // 2. JdbcTemplate batch insert (INSERT IGNORE 사용)
+        // 2. JdbcTemplate batch insert
         String sql = """
-                INSERT IGNORE INTO raw_bus_usage (
+                INSERT INTO raw_bus_usage (
                     id, opr_ymd, dow_nm, ctpv_cd, ctpv_nm, sgg_cd, sgg_nm,
                     emd_cd, emd_nm, rte_id, sttn_id, users_type_nm, utztn_nope
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -74,7 +74,7 @@ public class RawBusUsageServiceImpl implements RawBusUsageService {
             }
         });
 
-        log.info("[Batch] 최종 저장 요청: {}건 (유효 데이터 중복 제외는 DB가 처리)", validList.size());
+        log.info("[Batch] 최종 저장 요청: {}건", validList.size());
     }
 
     private boolean isValid(RawBusUsage rawBusUsage) {
