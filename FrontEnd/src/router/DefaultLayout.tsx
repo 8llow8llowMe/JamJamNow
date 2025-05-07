@@ -9,7 +9,7 @@ const DefaultLayout = () => {
       <header className="mx-auto max-w-[1280px] h-[80px] justify-center fixed top-0 left-0 right-0 bg-[#f2f7fa] z-10">
         <Header />
       </header>
-      <main className="pt-[80px] main-auto-height overflow-auto">
+      <main className="w-full pt-[80px] main-auto-height overflow-auto scrollbar-hide">
         <Outlet />
       </main>
       <footer className="h-[120px]">
