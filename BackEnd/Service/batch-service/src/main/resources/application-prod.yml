@@ -1,0 +1,60 @@
+server:
+  port: ${BATCH_SERVER_PORT}
+  shutdown: graceful
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_ENDPOINT}:${DB_PORT}/${DB_NAME}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Seoul&zeroDateTimeBehavior=convertToNull&rewriteBatchedStatements=true       # 데이터베이스 URL
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    open-in-view: false
+    defer-datasource-initialization: false
+    generate-ddl: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        show_sql: false
+        jdbc:
+          batch_size: 100
+        default_batch_fetch_size: 100
+
+# 공공데이터 포털 관련 OPEN API
+openapi:
+  categories:
+    # 버스 관련
+    bus:
+      apis:
+        # 국토교통부 대중교통 이용인원수
+        usage:
+          url: ${OPENAPI_BUS_USAGE_URL}
+          service-key: ${OPENAPI_BUS_USAGE_SERVICE_KEY}
+          defaultParams:
+            numOfRows: ${OPENAPI_BUS_USAGE_NUM_OF_ROWS}
+            dataType: ${OPENAPI_BUS_USAGE_DATA_TYPE}
+        # 국토교통부 노선별 혼잡도
+        congestion:
+          url: ${OPENAPI_BUS_CONGESTION_URL}
+          service-key: ${OPENAPI_BUS_CONGESTION_SERVICE_KEY}
+          default-params:
+            numOfRows: ${OPENAPI_BUS_CONGESTION_NUM_OF_ROWS}
+            dataType: ${OPENAPI_BUS_CONGESTION_DATA_TYPE}
+        # 국토교통부 노선별 차내 재차인원
+        reboarding:
+          url: ${OPENAPI_BUS_REBOARDING_URL}
+          service-key: ${OPENAPI_BUS_REBOARDING_SERVICE_KEY}
+          default-params:
+            numOfRows: ${OPENAPI_BUS_REBOARDING_NUM_OF_ROWS}
+            dataType: ${OPENAPI_BUS_REBOARDING_DATA_TYPE}
+        # 국토교통부 환승통행량
+        transferVolume:
+          url: ${OPENAPI_BUS_TRANSFER_VOLUME_URL}
+          service-key: ${OPENAPI_BUS_TRANSFER_VOLUME_SERVICE_KEY}
+          default-params:
+            numOfRows: ${OPENAPI_BUS_TRANSFER_VOLUME_NUM_OF_ROWS}
+            dataType: ${OPENAPI_BUS_TRANSFER_VOLUME_DATA_TYPE}
