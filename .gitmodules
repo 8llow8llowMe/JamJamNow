@@ -1,3 +1,8 @@
 [submodule "FrontEnd/env"]
 	path = FrontEnd/env
 	url = https://github.com/8llow8llowMe/JamJamNow-env.git
+	branch = feature/FE/env
+[submodule "BackEnd/env"]
+	path = BackEnd/env
+	url = https://github.com/8llow8llowMe/JamJamNow-env.git
+	branch = feature/BE/env
